@@ -70,6 +70,54 @@ typedef gtsam::RangeFactorWithTransform<gtsam::Pose2, gtsam::Pose2>
 typedef gtsam::RangeFactorWithTransform<gtsam::Pose3, gtsam::Pose3>
     RangeFactorWithTransformPose3;
 
+#include <gtsam/sam/RangeFactor.h>
+template <POSE, POINT>
+virtual class RangeFactorWithTransformBias : gtsam::NoiseModelFactor {
+  RangeFactorWithTransformBias(size_t key1, size_t key2, size_t bias, double measured,
+                           const gtsam::noiseModel::Base* noiseModel,
+                           const POSE& body_T_sensor);
+
+  // enabling serialization functionality
+  void serialize() const;
+
+  // Use `double` instead of template since that is all we need.
+  const double measured() const;
+};
+
+typedef gtsam::RangeFactorWithTransformBias<gtsam::Pose2, gtsam::Point2>
+    RangeFactorWithTransformBias2D;
+typedef gtsam::RangeFactorWithTransformBias<gtsam::Pose3, gtsam::Point3>
+    RangeFactorWithTransformBias3D;
+typedef gtsam::RangeFactorWithTransformBias<gtsam::Pose2, gtsam::Pose2>
+    RangeFactorWithTransformBiasPose2;
+typedef gtsam::RangeFactorWithTransformBias<gtsam::Pose3, gtsam::Pose3>
+    RangeFactorWithTransformBiasPose3;
+
+
+#include <gtsam/sam/RangeFactor.h>
+template <POSE, POINT>
+virtual class RangeFactorWithTransformBiasAsymmetric : gtsam::NoiseModelFactor {
+  RangeFactorWithTransformBiasAsymmetric(size_t key1, size_t key2, size_t bias, double measured,
+                           const gtsam::noiseModel::Base* noiseModel,
+                           const POSE& body_T_sensor,
+                           double max_allowed_negativity);
+
+  // enabling serialization functionality
+  void serialize() const;
+
+  // Use `double` instead of template since that is all we need.
+  const double measured() const;
+};
+
+typedef gtsam::RangeFactorWithTransformBiasAsymmetric<gtsam::Pose2, gtsam::Point2>
+    RangeFactorWithTransformBiasAsymmetric2D;
+typedef gtsam::RangeFactorWithTransformBiasAsymmetric<gtsam::Pose3, gtsam::Point3>
+    RangeFactorWithTransformBiasAsymmetric3D;
+typedef gtsam::RangeFactorWithTransformBiasAsymmetric<gtsam::Pose2, gtsam::Pose2>
+    RangeFactorWithTransformBiasAsymmetricPose2;
+typedef gtsam::RangeFactorWithTransformBiasAsymmetric<gtsam::Pose3, gtsam::Pose3>
+    RangeFactorWithTransformBiasAsymmetricPose3;
+
 #include <gtsam/sam/BearingFactor.h>
 template <POSE, POINT, BEARING>
 virtual class BearingFactor : gtsam::NoiseModelFactor {
