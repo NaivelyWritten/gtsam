@@ -10,14 +10,17 @@ Author: Frank Dellaert
 """
 # pylint: disable=invalid-name, no-name-in-module, no-member
 
+import math
 import unittest
 
-import gtsam
 import numpy as np
-from gtsam import (BetweenFactorPose2, LevenbergMarquardtParams, Pose2, Rot2,
-                   ShonanAveraging2, ShonanAveraging3,
-                   ShonanAveragingParameters2, ShonanAveragingParameters3)
 from gtsam.utils.test_case import GtsamTestCase
+
+import gtsam
+from gtsam import (BetweenFactorPose2, BetweenFactorPose3,
+                   BinaryMeasurementRot3, LevenbergMarquardtParams, Pose2,
+                   Pose3, Rot2, Rot3, ShonanAveraging2, ShonanAveraging3,
+                   ShonanAveragingParameters2, ShonanAveragingParameters3)
 
 DEFAULT_PARAMS = ShonanAveragingParameters3(
     gtsam.LevenbergMarquardtParams.CeresDefaults()
@@ -139,7 +142,6 @@ class TestShonanAveraging(GtsamTestCase):
         self.assertAlmostEqual(3.0756, shonan.cost(initial), places=3)
         result, _lambdaMin = shonan.run(initial, 3, 3)
         self.assertAlmostEqual(0.0015, shonan.cost(result), places=3)
-    
 
     def test_constructorBetweenFactorPose2s(self) -> None:
         """Check if ShonanAveraging2 constructor works when not initialized from g2o file.
@@ -189,14 +191,27 @@ class TestShonanAveraging(GtsamTestCase):
 
         wRi_list = [result_values.atRot2(i) for i in range(num_images)]
         thetas_deg = np.array([wRi.degrees() for wRi in wRi_list])
-        
+
         # map all angles to [0,360)
         thetas_deg = thetas_deg % 360
         thetas_deg -= thetas_deg[0]
-        
+
         expected_thetas_deg = np.array([0.0, 90.0, 0.0])
         np.testing.assert_allclose(thetas_deg, expected_thetas_deg, atol=0.1)
 
+    def test_measurements3(self):
+        """Create from Measurements."""
+        measurements = []
+        unit3 = gtsam.noiseModel.Unit.Create(3)
+        m01 = BinaryMeasurementRot3(0, 1, Rot3.Yaw(math.radians(90)), unit3)
+        m12 = BinaryMeasurementRot3(1, 2, Rot3.Yaw(math.radians(90)), unit3)
+        measurements.append(m01)
+        measurements.append(m12)
+        obj = ShonanAveraging3(measurements)
+        self.assertIsInstance(obj, ShonanAveraging3)
+        initial = obj.initializeRandomly()
+        _, cost = obj.run(initial, min_p=3, max_p=5)
+        self.assertAlmostEqual(cost, 0)
 
 if __name__ == "__main__":
     unittest.main()

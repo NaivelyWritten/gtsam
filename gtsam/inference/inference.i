@@ -104,11 +104,13 @@ class Ordering {
   // Standard Constructors and Named Constructors
   Ordering();
   Ordering(const gtsam::Ordering& other);
+  Ordering(const std::vector<size_t>& keys);
 
   template <
       FACTOR_GRAPH = {gtsam::NonlinearFactorGraph, gtsam::DiscreteFactorGraph,
                       gtsam::SymbolicFactorGraph, gtsam::GaussianFactorGraph, gtsam::HybridGaussianFactorGraph}>
   static gtsam::Ordering Colamd(const FACTOR_GRAPH& graph);
+  static gtsam::Ordering Colamd(const gtsam::VariableIndex& variableIndex);
 
   template <
       FACTOR_GRAPH = {gtsam::NonlinearFactorGraph, gtsam::DiscreteFactorGraph,
@@ -147,7 +149,7 @@ class Ordering {
 
   // Standard interface
   size_t size() const;
-  size_t at(size_t key) const;
+  size_t at(size_t i) const;
   void push_back(size_t key);
 
   // enabling serialization functionality
@@ -191,6 +193,17 @@ class VariableIndex {
   size_t size() const;
   size_t nFactors() const;
   size_t nEntries() const;
+};
+
+#include <gtsam/inference/Factor.h>
+virtual class Factor {
+  void print(string s = "Factor\n", const gtsam::KeyFormatter& keyFormatter =
+                                        gtsam::DefaultKeyFormatter) const;
+  void printKeys(string s = "") const;
+  bool equals(const gtsam::Factor& other, double tol = 1e-9) const;
+  bool empty() const;
+  size_t size() const;
+  gtsam::KeyVector keys() const;
 };
 
 }  // namespace gtsam

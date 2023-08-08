@@ -274,8 +274,7 @@ class VectorValues {
 };
 
 #include <gtsam/linear/GaussianFactor.h>
-virtual class GaussianFactor {
-  gtsam::KeyVector keys() const;
+virtual class GaussianFactor : gtsam::Factor {
   void print(string s = "", const gtsam::KeyFormatter& keyFormatter =
                                 gtsam::DefaultKeyFormatter) const;
   bool equals(const gtsam::GaussianFactor& lf, double tol) const;
@@ -286,8 +285,6 @@ virtual class GaussianFactor {
   Matrix information() const;
   Matrix augmentedJacobian() const;
   pair<Matrix, Vector> jacobian() const;
-  size_t size() const;
-  bool empty() const;
 };
 
 #include <gtsam/linear/JacobianFactor.h>
@@ -314,10 +311,7 @@ virtual class JacobianFactor : gtsam::GaussianFactor {
   //Testable
   void print(string s = "", const gtsam::KeyFormatter& keyFormatter =
                                 gtsam::DefaultKeyFormatter) const;
-  void printKeys(string s) const;
-  gtsam::KeyVector& keys() const;
   bool equals(const gtsam::GaussianFactor& lf, double tol) const;
-  size_t size() const;
   Vector unweighted_error(const gtsam::VectorValues& c) const;
   Vector error_vector(const gtsam::VectorValues& c) const;
   double error(const gtsam::VectorValues& c) const;
@@ -359,10 +353,8 @@ virtual class HessianFactor : gtsam::GaussianFactor {
   HessianFactor(const gtsam::GaussianFactorGraph& factors);
 
   //Testable
-  size_t size() const;
   void print(string s = "", const gtsam::KeyFormatter& keyFormatter =
                                 gtsam::DefaultKeyFormatter) const;
-  void printKeys(string s) const;
   bool equals(const gtsam::GaussianFactor& lf, double tol) const;
   double error(const gtsam::VectorValues& c) const;
 
