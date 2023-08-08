@@ -517,6 +517,55 @@ AsymmetricCauchy::shared_ptr AsymmetricCauchy::Create(double k, const ReweightSc
 }
 
 
+/* ************************************************************************* */
+// AsymmetricCauchyTwoSide
+/* ************************************************************************* */
+
+AsymmetricCauchyTwoSide::AsymmetricCauchyTwoSide(double k, const ReweightScheme reweight) : Base(reweight), k_(k), ksquared_(k * k) {
+  if (k <= 0) {
+    throw runtime_error("mEstimator AsymmetricCauchyTwoSide takes only positive double in constructor.");
+  }
+}
+
+double AsymmetricCauchyTwoSide::weight(double distance) const {
+  distance = -distance;
+  if (distance >= 10.0 * k_) {
+    return Cauchy(10.0 * k_).weight(distance);
+  }
+  if (distance >= 0.0) {
+    return 1.0;
+  }
+  
+  return ksquared_ / (ksquared_ + distance*distance);
+}
+
+double AsymmetricCauchyTwoSide::loss(double distance) const {
+  distance = -distance;
+  if (distance >= 10.0 * k_) {
+    return Cauchy(10.0 * k_).loss(distance);
+  }
+  if (distance >= 0.0) {
+    return distance * distance / 2.0;
+  }
+  const double val = std::log1p(distance * distance / ksquared_);
+  return ksquared_ * val * 0.5;
+}
+
+void AsymmetricCauchyTwoSide::print(const std::string &s="") const {
+  std::cout << s << ": AsymmetricCauchyTwoSide (" << k_ << ")" << std::endl;
+}
+
+bool AsymmetricCauchyTwoSide::equals(const Base &expected, double tol) const {
+  const AsymmetricCauchyTwoSide* p = dynamic_cast<const AsymmetricCauchyTwoSide*>(&expected);
+  if (p == nullptr) return false;
+  return std::abs(k_ - p->k_) < tol;
+}
+
+AsymmetricCauchyTwoSide::shared_ptr AsymmetricCauchyTwoSide::Create(double k, const ReweightScheme reweight) {
+  return shared_ptr(new AsymmetricCauchyTwoSide(k, reweight));
+}
+
+
 } // namespace mEstimator
 } // namespace noiseModel
 } // gtsam

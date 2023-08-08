@@ -544,6 +544,43 @@ class GTSAM_EXPORT AsymmetricCauchy : public Base {
 #endif
 };
 
+/** Implementation of the "AsymmetricCauchyTwoSide" robust error model.
+ *
+ *  This model has a scalar parameter "k".
+ *
+ * - Following are all for one side, the other is standard L2
+ * - Loss       \rho(x) = 0.5 k² log(1+x²/k²)
+ * - Derivative \phi(x) = (k²x)/(x²+k²)
+ * - Weight     w(x) = \phi(x)/x = k²/(x²+k²)
+ */
+class GTSAM_EXPORT AsymmetricCauchyTwoSide : public Base {
+ protected:
+  double k_, ksquared_;
+
+ public:
+  typedef std::shared_ptr<AsymmetricCauchyTwoSide> shared_ptr;
+
+  AsymmetricCauchyTwoSide(double k = 0.1, const ReweightScheme reweight = Block);
+  double weight(double distance) const override;
+  double loss(double distance) const override;
+  void print(const std::string &s) const override;
+  bool equals(const Base &expected, double tol = 1e-8) const override;
+  static shared_ptr Create(double k, const ReweightScheme reweight = Block);
+  double modelParameter() const { return k_; }
+
+ private:
+#ifdef GTSAM_ENABLE_BOOST_SERIALIZATION
+  /** Serialization function */
+  friend class boost::serialization::access;
+  template <class ARCHIVE>
+  void serialize(ARCHIVE &ar, const unsigned int /*version*/) {
+    ar &BOOST_SERIALIZATION_BASE_OBJECT_NVP(Base);
+    ar &BOOST_SERIALIZATION_NVP(k_);
+    ar &BOOST_SERIALIZATION_NVP(ksquared_);
+  }
+#endif
+};
+
 }  // namespace mEstimator
 }  // namespace noiseModel
 }  // namespace gtsam
